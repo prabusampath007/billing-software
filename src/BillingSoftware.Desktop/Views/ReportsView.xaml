@@ -1,0 +1,79 @@
+<UserControl x:Class="BillingSoftware.Desktop.Views.ReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="CheckText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding TrialOk}" Value="False"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <DataTemplate x:Key="KeyValueTemplate">
+            <Grid Margin="0,3">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Label}"/>
+                <TextBlock Grid.Column="1" Text="{Binding Value}" FontWeight="SemiBold" TextWrapping="NoWrap" Margin="16,0,0,0"/>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid Margin="16">
+        <Border Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Reports" Style="{StaticResource H1}"/>
+                    <WrapPanel Margin="0,10,0,10">
+                        <DatePicker SelectedDate="{Binding Date}" MinWidth="150" Margin="0,0,8,0" AutomationProperties.Name="Report date"/>
+                        <Button Content="Refresh" Command="{Binding RefreshCommand}"/>
+                    </WrapPanel>
+                </StackPanel>
+                <TabControl Grid.Row="1">
+                    <TabItem Header="Day summary">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel Margin="4,12" MaxWidth="620" HorizontalAlignment="Left">
+                                <ItemsControl ItemsSource="{Binding Figures}" ItemTemplate="{StaticResource KeyValueTemplate}"/>
+                                <TextBlock Text="By payment mode" Style="{StaticResource H2}" Margin="0,18,0,4"/>
+                                <ItemsControl ItemsSource="{Binding ByMode}" ItemTemplate="{StaticResource KeyValueTemplate}"/>
+                                <TextBlock Text="By cashier" Style="{StaticResource H2}" Margin="0,18,0,4"/>
+                                <ItemsControl ItemsSource="{Binding ByCashier}" ItemTemplate="{StaticResource KeyValueTemplate}"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem Header="Trial balance">
+                        <Grid Margin="0,10,0,0">
+                            <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                            <DataGrid ItemsSource="{Binding Trial}" MinHeight="200" AutomationProperties.Name="Trial balance">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Code" Binding="{Binding Code}" Width="70"/>
+                                    <DataGridTextColumn Header="Account" Binding="{Binding Name}" Width="*" MinWidth="140"/>
+                                    <DataGridTextColumn Header="Debit" Binding="{Binding Debit}" Width="120" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="Credit" Binding="{Binding Credit}" Width="120" ElementStyle="{StaticResource RightCell}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <StackPanel Grid.Row="1" Margin="0,10,0,0">
+                                <TextBlock Text="{Binding TrialTotals}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding TrialCheck}" Style="{StaticResource CheckText}"/>
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="Stock">
+                        <Grid Margin="0,10,0,0">
+                            <Grid.RowDefinitions><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                            <DataGrid ItemsSource="{Binding Stock}" MinHeight="200" AutomationProperties.Name="Stock valuation">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Code" Binding="{Binding Sku}" Width="90"/>
+                                    <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" MinWidth="140"/>
+                                    <DataGridTextColumn Header="Stock" Binding="{Binding Qty}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="Avg cost" Binding="{Binding Cost}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="Value" Binding="{Binding Value}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <TextBlock Grid.Row="1" Text="{Binding StockTotal}" FontWeight="SemiBold" Margin="0,10,0,0"/>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

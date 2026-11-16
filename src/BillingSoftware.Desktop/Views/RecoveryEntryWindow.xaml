@@ -1,0 +1,20 @@
+<Window x:Class="BillingSoftware.Desktop.Views.RecoveryEntryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource AppWindow}"
+        Title="Recovery key needed" Width="620" SizeToContent="Height" MinWidth="360" MaxWidth="760"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Border Style="{StaticResource Card}" Margin="16">
+        <StackPanel>
+            <TextBlock Text="Recovery key needed" Style="{StaticResource H1}"/>
+            <TextBlock x:Name="MessageText" Margin="0,8,0,0"/>
+            <TextBlock Text="Recovery key (64 letters and digits, with or without dashes)" Style="{StaticResource FieldLabel}" Margin="0,14,0,3"/>
+            <TextBox x:Name="KeyInput" FontFamily="Consolas" CharacterCasing="Upper" TextWrapping="Wrap" AutomationProperties.Name="Recovery key"/>
+            <Grid Margin="0,18,0,0">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <Button Content="Exit" HorizontalAlignment="Left" IsCancel="True"/>
+                <Button Grid.Column="1" Content="Continue" IsDefault="True" Style="{StaticResource PrimaryButton}" Margin="0" Padding="22,7" Click="Continue_Click"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

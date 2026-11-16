@@ -1,0 +1,5 @@
+Name,Phone,GSTIN,State code,Credit limit,Opening due
+Ravi Traders,9000000001,,33,5000,2500
+Kumar Stores,9000000003,33AAAAA1111A1Z5,,20000,0
+Bangalore Mart,9000000004,29AAAAA2222A1Z5,,,
+Bad GSTIN example,9000000005,12345,,,

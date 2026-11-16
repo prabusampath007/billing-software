@@ -1,0 +1,76 @@
+<Window x:Class="BillingSoftware.Desktop.Views.ReturnWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource AppWindow}"
+        Width="820" Height="640" MinWidth="420" MinHeight="460"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="B2V"/>
+    </Window.Resources>
+    <DockPanel Margin="12">
+        <WrapPanel DockPanel.Dock="Bottom" Margin="0,12,0,0" HorizontalAlignment="Right">
+            <Button Content="Cancel" IsCancel="True" Margin="0,0,8,0"/>
+            <Button Content="Confirm return" Command="{Binding ConfirmCommand}" Style="{StaticResource PrimaryButton}" Margin="0" Padding="22,7"/>
+        </WrapPanel>
+        <Border Style="{StaticResource Card}">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <StackPanel>
+                    <TextBlock Text="{Binding Title}" Style="{StaticResource H1}"/>
+                    <TextBlock Text="{Binding Subtitle}" Style="{StaticResource Muted}" Margin="0,2,0,0"/>
+
+                    <DataGrid ItemsSource="{Binding Lines}" IsReadOnly="False" Margin="0,14,0,0" MinHeight="150" MaxHeight="320" AutomationProperties.Name="Items to return">
+                        <DataGrid.Columns>
+                            <DataGridTemplateColumn Header="Item" Width="*" MinWidth="120" IsReadOnly="True">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel VerticalAlignment="Center" Margin="0,3">
+                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                            <TextBlock Text="{Binding Error}" Foreground="{StaticResource DangerBrush}" FontSize="11.5" Visibility="{Binding HasError, Converter={StaticResource B2V}}"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTextColumn Header="Qty" Width="80" IsReadOnly="True" Binding="{Binding SoldText}" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Returned" Width="98" IsReadOnly="True" Binding="{Binding BeforeText}" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTemplateColumn Header="Return" Width="92">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding QtyText, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" MinHeight="28" Margin="2"
+                                                 IsEnabled="{Binding CanReturn}" AutomationProperties.Name="Quantity to return"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Restock" Width="92">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding Restock, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0"
+                                                  ToolTip="Untick if the goods are damaged and cannot be sold again" AutomationProperties.Name="Put back in stock"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Content="Return everything that is left" Command="{Binding SelectAllCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+
+                    <TextBlock Text="Money goes back by" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox ItemsSource="{Binding Modes}" SelectedItem="{Binding SelectedMode}" DisplayMemberPath="Label" MaxWidth="420" HorizontalAlignment="Left" MinWidth="220" AutomationProperties.Name="Refund method"/>
+                    <TextBlock Text="Reason (required)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding Reason, UpdateSourceTrigger=PropertyChanged}" AutomationProperties.Name="Reason for return"/>
+
+                    <TextBlock Text="{Binding PreviewText}" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource PrimaryBrush}" Margin="0,16,0,0"/>
+                    <Border Background="{StaticResource ErrorBackBrush}" CornerRadius="4" Padding="10,6" Margin="0,8,0,0">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="Visible"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ErrorText}" Value=""><Setter Property="Visibility" Value="Collapsed"/></DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding ErrorText}" Foreground="{StaticResource DangerBrush}"/>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </DockPanel>
+</Window>

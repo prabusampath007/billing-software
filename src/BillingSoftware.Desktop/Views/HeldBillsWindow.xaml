@@ -1,0 +1,20 @@
+<Window x:Class="BillingSoftware.Desktop.Views.HeldBillsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource AppWindow}" Title="Held bills"
+        Width="560" Height="460" MinWidth="360" MinHeight="300"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Border Style="{StaticResource Card}" Margin="16">
+        <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Held bills" Style="{StaticResource H2}"/>
+            <TextBlock DockPanel.Dock="Top" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,8"
+                       Text="Choose a bill to bring back to the counter. Prices are taken fresh when it comes back."/>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+                <Button Content="Discard" Style="{StaticResource DangerButton}" Click="Discard_Click" AutomationProperties.Name="Discard the held bill"/>
+                <Button Content="Close" IsCancel="True"/>
+                <Button Content="Bring back" IsDefault="True" Style="{StaticResource PrimaryButton}" Margin="0" Padding="22,7" Click="Recall_Click" AutomationProperties.Name="Bring the bill back"/>
+            </StackPanel>
+            <ListBox x:Name="List" DisplayMemberPath="Text" MouseDoubleClick="List_DoubleClick" AutomationProperties.Name="Held bills"/>
+        </DockPanel>
+    </Border>
+</Window>

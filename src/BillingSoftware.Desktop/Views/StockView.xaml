@@ -1,0 +1,103 @@
+<UserControl x:Class="BillingSoftware.Desktop.Views.StockView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="StatusText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="Margin" Value="0,12,0,0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusIsError}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="StockRowStyle" TargetType="DataGridRow">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsLow}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="Scroller_SizeChanged">
+        <Grid x:Name="Root" Margin="16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="SecondColumn" Width="400"/></Grid.ColumnDefinitions>
+            <Grid.RowDefinitions><RowDefinition x:Name="FirstRow" Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+
+            <Border x:Name="ListPane" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Stock" Style="{StaticResource H1}"/>
+                        <TextBlock Text="{Binding Summary}" Style="{StaticResource Muted}"/>
+                    </StackPanel>
+                    <Grid Grid.Row="1" Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}" MaxWidth="420" HorizontalAlignment="Left" Width="420" AutomationProperties.Name="Search stock" ToolTip="Search by name, code or barcode. Results follow your typing."/>
+                        <CheckBox Grid.Column="1" Content="Out of stock only" IsChecked="{Binding OnlyOut}" Margin="16,0,0,0" VerticalAlignment="Center"/>
+                    </Grid>
+                    <DataGrid Grid.Row="2" ItemsSource="{Binding Items}" SelectedItem="{Binding Selected, Mode=TwoWay}" RowStyle="{StaticResource StockRowStyle}" Margin="0,12,0,0" MinHeight="240" AutomationProperties.Name="Stock list">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Item" Binding="{Binding Name}" Width="*" MinWidth="150"/>
+                            <DataGridTextColumn Header="Code" Binding="{Binding Sku}" Width="100"/>
+                            <DataGridTextColumn Header="On hand" Binding="{Binding QtyText}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Unit" Binding="{Binding Unit}" Width="60"/>
+                            <DataGridTextColumn Header="Avg cost" Binding="{Binding AvgCostText}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Value" Binding="{Binding ValueText}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding StatusText}" Width="100"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <Border x:Name="FormPane" Grid.Column="1" Style="{StaticResource Card}" Padding="0">
+                <ScrollViewer x:Name="FormScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="16">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding PanelTitle}" Style="{StaticResource H2}" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="&#x2715;  Close" Command="{Binding ClosePanelCommand}" Margin="8,0,0,0" MinHeight="30" Padding="10,3" AutomationProperties.Name="Close the stock panel"/>
+                        </Grid>
+                        <TextBlock Text="{Binding StockInfo}" Margin="0,6,0,0"/>
+
+                        <TextBlock Text="Add stock" Style="{StaticResource SectionTitle}" Margin="0,18,0,0"/>
+                        <TextBlock Text="Opening stock or goods received without a purchase bill." Style="{StaticResource Muted}"/>
+                        <Grid Margin="0,8,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding OpeningQty, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" AutomationProperties.Name="Quantity to add" ToolTip="Quantity"/>
+                            <TextBox Grid.Column="2" Text="{Binding OpeningCost, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" AutomationProperties.Name="Cost per unit" ToolTip="Cost per unit (₹)"/>
+                        </Grid>
+                        <TextBlock Text="Quantity, then cost per unit (₹)" Style="{StaticResource Muted}" Margin="0,3,0,0"/>
+                        <Button Content="Add stock" Command="{Binding ReceiveStockCommand}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+
+                        <TextBlock Text="Adjust stock" Style="{StaticResource SectionTitle}" Margin="0,20,0,0"/>
+                        <TextBlock Text="Loss or damage (negative) or a gain (positive)." Style="{StaticResource Muted}"/>
+                        <TextBox Text="{Binding AdjustQty, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" Margin="0,8,0,0" AutomationProperties.Name="Adjustment quantity"/>
+                        <TextBlock Text="Reason" Style="{StaticResource FieldLabel}"/>
+                        <TextBox Text="{Binding AdjustReason}" AutomationProperties.Name="Adjustment reason"/>
+                        <Button Content="Adjust stock" Command="{Binding AdjustCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+
+                        <TextBlock Text="Repack into smaller packs" Style="{StaticResource SectionTitle}" Margin="0,20,0,0"/>
+                        <TextBlock Style="{StaticResource Muted}"
+                                   Text="Turns this item's stock into another item (its own barcode, price and GST). Stock and cost move across, so there is no profit or loss. Repack back to undo."/>
+                        <TextBlock Text="Pack item" Style="{StaticResource FieldLabel}"/>
+                        <ComboBox ItemsSource="{Binding RepackTargets}" SelectedItem="{Binding RepackTarget}" DisplayMemberPath="Name" AutomationProperties.Name="Pack item"/>
+                        <Grid Margin="0,6,0,0">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="8"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding RepackSourceQtyText, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" AutomationProperties.Name="Stock used" ToolTip="Stock used from this item"/>
+                            <TextBox Grid.Column="2" Text="{Binding RepackTargetQtyText, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Right" AutomationProperties.Name="Packs made" ToolTip="Packs made"/>
+                        </Grid>
+                        <TextBlock Text="Stock used from this item, then packs made" Style="{StaticResource Muted}" Margin="0,3,0,0"/>
+                        <TextBlock Text="{Binding RepackPreviewText}" TextWrapping="Wrap" Margin="0,6,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+                                    <Style.Triggers><DataTrigger Binding="{Binding RepackPreviewIsError}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger></Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <Button Content="Repack" Command="{Binding RepackNowCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+
+                        <TextBlock Text="{Binding Status}" Style="{StaticResource StatusText}"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

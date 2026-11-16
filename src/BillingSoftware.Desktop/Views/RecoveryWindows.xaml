@@ -1,0 +1,25 @@
+<Window x:Class="BillingSoftware.Desktop.Views.RecoveryKeyWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource AppWindow}"
+        Title="Save your recovery key" Width="620" SizeToContent="Height" MinWidth="360" MaxWidth="760"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Border Style="{StaticResource Card}" Margin="16">
+        <StackPanel>
+            <TextBlock Text="Save your recovery key" Style="{StaticResource H1}"/>
+            <TextBlock Margin="0,8,0,0"
+                       Text="Your shop data is encrypted. If this computer is replaced or its Windows is reinstalled, this key is the only way to open your backups. Write it down or save it to a USB drive and keep it somewhere safe, away from this computer."/>
+            <Border Background="{StaticResource SurfaceBrush}" BorderBrush="{StaticResource LineBrush}" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,14,0,0">
+                <TextBox x:Name="KeyText" IsReadOnly="True" FontFamily="Consolas" FontSize="15" TextWrapping="Wrap" BorderThickness="0"
+                         Background="Transparent" AutomationProperties.Name="Recovery key"/>
+            </Border>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Content="Copy" Click="Copy_Click"/>
+                <Button Content="Save to a file..." Click="Save_Click"/>
+            </StackPanel>
+            <CheckBox x:Name="Acknowledge" Content="I have saved my recovery key in a safe place" Checked="Acknowledge_Changed" Unchecked="Acknowledge_Changed"/>
+            <Button x:Name="ContinueButton" Content="Continue" IsEnabled="False" HorizontalAlignment="Right" Margin="0,16,0,0"
+                    Style="{StaticResource PrimaryButton}" Padding="24,7" Click="Continue_Click"/>
+        </StackPanel>
+    </Border>
+</Window>

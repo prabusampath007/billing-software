@@ -1,0 +1,178 @@
+<UserControl x:Class="BillingSoftware.Desktop.Views.GstView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:v="clr-namespace:BillingSoftware.Desktop.Views">
+    <UserControl.Resources>
+        <v:PaiseConverter x:Key="Paise"/>
+        <v:RateConverter x:Key="Rate"/>
+        <v:QtyConverter x:Key="QtyFmt"/>
+        <BooleanToVisibilityConverter x:Key="B2V"/>
+        <Style x:Key="SummaryRow" TargetType="DataGridRow">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsHeading}" Value="True">
+                    <Setter Property="Background" Value="#EEF2FA"/>
+                    <Setter Property="FontWeight" Value="SemiBold"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="Scroller_SizeChanged">
+    <Grid x:Name="Root" Margin="16">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+
+        <Border Style="{StaticResource Card}" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="{Binding Heading}" Style="{StaticResource H1}"/>
+                <TextBlock Style="{StaticResource Muted}" Margin="0,2,0,0"
+                           Text="Worksheets for your accountant to check. Nothing is filed from here, and the final figures are the accountant's decision."/>
+                <WrapPanel Margin="0,12,0,0">
+                    <TextBlock Text="Month" VerticalAlignment="Center" Margin="0,0,6,6"/>
+                    <ComboBox ItemsSource="{Binding Months}" SelectedItem="{Binding Month}" DisplayMemberPath="Name" MinWidth="130" Margin="0,0,10,6" AutomationProperties.Name="Month"/>
+                    <ComboBox ItemsSource="{Binding Years}" SelectedItem="{Binding Year}" MinWidth="90" Margin="0,0,14,6" AutomationProperties.Name="Year"/>
+                    <Button Content="Prepare" Command="{Binding PrepareCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,6" MinWidth="100"/>
+                    <Button Content="Save to Excel..." Command="{Binding ExportCommand}" Margin="0,0,8,6"/>
+                    <Button Content="View printable summary" Command="{Binding PrintSummaryCommand}" Margin="0,0,0,6"/>
+                </WrapPanel>
+                <TextBlock Text="{Binding Status}" Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="8">
+            <TabControl Visibility="{Binding HasReport, Converter={StaticResource B2V}}" MinHeight="300">
+                <TabItem Header="Summary (3B)">
+                    <DataGrid ItemsSource="{Binding Summary}" RowStyle="{StaticResource SummaryRow}" HeadersVisibility="None" AutomationProperties.Name="GSTR-3B summary">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Label}" Width="430"/>
+                            <DataGridTextColumn Binding="{Binding Taxable}" Width="120" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Binding="{Binding Igst}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Binding="{Binding Cgst}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Binding="{Binding Sgst}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="B2B">
+                    <DataGrid ItemsSource="{Binding Report.B2B}" AutomationProperties.Name="Sales to registered customers">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Customer GSTIN" Binding="{Binding Gstin}" Width="150"/>
+                            <DataGridTextColumn Header="Customer" Binding="{Binding PartyName}" Width="230"/>
+                            <DataGridTextColumn Header="Invoice" Binding="{Binding DocNo}" Width="140"/>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=dd-MMM-yy}" Width="90"/>
+                            <DataGridTextColumn Header="Invoice value" Binding="{Binding DocValuePaise, Converter={StaticResource Paise}}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="POS" Binding="{Binding PlaceOfSupply}" Width="50"/>
+                            <DataGridTextColumn Header="Rate" Binding="{Binding RateBp, Converter={StaticResource Rate}}" Width="60" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Taxable" Binding="{Binding TaxablePaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="IGST" Binding="{Binding IgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="CGST" Binding="{Binding CgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="SGST" Binding="{Binding SgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="B2CL">
+                    <DataGrid ItemsSource="{Binding Report.B2Cl}" AutomationProperties.Name="Large inter-state consumer invoices">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Invoice" Binding="{Binding DocNo}" Width="230"/>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=dd-MMM-yy}" Width="90"/>
+                            <DataGridTextColumn Header="Invoice value" Binding="{Binding DocValuePaise, Converter={StaticResource Paise}}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="POS" Binding="{Binding PlaceOfSupply}" Width="50"/>
+                            <DataGridTextColumn Header="Rate" Binding="{Binding RateBp, Converter={StaticResource Rate}}" Width="60" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Taxable" Binding="{Binding TaxablePaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="IGST" Binding="{Binding IgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="B2CS">
+                    <DataGrid ItemsSource="{Binding Report.B2Cs}" AutomationProperties.Name="Small consumer sales">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Place of supply" Binding="{Binding PlaceOfSupply}" Width="230"/>
+                            <DataGridTextColumn Header="Rate" Binding="{Binding RateBp, Converter={StaticResource Rate}}" Width="70" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Taxable" Binding="{Binding TaxablePaise, Converter={StaticResource Paise}}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="IGST" Binding="{Binding IgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="CGST" Binding="{Binding CgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="SGST" Binding="{Binding SgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Credit notes">
+                    <DataGrid ItemsSource="{Binding Report.Notes}" AutomationProperties.Name="Credit notes">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="100"/>
+                            <DataGridTextColumn Header="Customer" Binding="{Binding PartyName}" Width="230"/>
+                            <DataGridTextColumn Header="Credit note" Binding="{Binding NoteNo}" Width="140"/>
+                            <DataGridTextColumn Header="Original invoice" Binding="{Binding OriginalNo}" Width="140"/>
+                            <DataGridTextColumn Header="Rate" Binding="{Binding RateBp, Converter={StaticResource Rate}}" Width="60" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Taxable" Binding="{Binding TaxablePaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="IGST" Binding="{Binding IgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="CGST" Binding="{Binding CgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="SGST" Binding="{Binding SgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="HSN">
+                    <DataGrid ItemsSource="{Binding Report.Hsn}" AutomationProperties.Name="HSN summary">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="HSN" Binding="{Binding Hsn}" Width="100"/>
+                            <DataGridTextColumn Header="UQC" Binding="{Binding Uqc}" Width="60"/>
+                            <DataGridTextColumn Header="Rate" Binding="{Binding RateBp, Converter={StaticResource Rate}}" Width="60" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Qty sold" Binding="{Binding SoldQtyMilli, Converter={StaticResource QtyFmt}}" Width="80" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Taxable sold" Binding="{Binding SoldTaxablePaise, Converter={StaticResource Paise}}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Tax sold" Binding="{Binding SoldTaxPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Qty returned" Binding="{Binding ReturnQtyMilli, Converter={StaticResource QtyFmt}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Taxable returned" Binding="{Binding ReturnTaxablePaise, Converter={StaticResource Paise}}" Width="120" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Tax returned" Binding="{Binding ReturnTaxPaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Documents">
+                    <DataGrid ItemsSource="{Binding Report.Documents}" AutomationProperties.Name="Document summary">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Document type" Binding="{Binding Description}" Width="230"/>
+                            <DataGridTextColumn Header="From" Binding="{Binding From}" Width="150"/>
+                            <DataGridTextColumn Header="To" Binding="{Binding To}" Width="150"/>
+                            <DataGridTextColumn Header="Issued" Binding="{Binding Total}" Width="80" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Cancelled" Binding="{Binding Cancelled}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Sales register">
+                    <DataGrid ItemsSource="{Binding Report.SalesRegister}" AutomationProperties.Name="Sales register">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Document" Binding="{Binding DocNo}" Width="140"/>
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=dd-MMM-yy}" Width="90"/>
+                            <DataGridTextColumn Header="Customer" Binding="{Binding Customer}" Width="230"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="110"/>
+                            <DataGridTextColumn Header="Taxable" Binding="{Binding TaxablePaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="CGST" Binding="{Binding CgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="SGST" Binding="{Binding SgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="IGST" Binding="{Binding IgstPaise, Converter={StaticResource Paise}}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalPaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Purchase register">
+                    <DataGrid ItemsSource="{Binding Report.PurchaseRegister}" AutomationProperties.Name="Purchase register">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Purchase" Binding="{Binding PurchaseNo}" Width="140"/>
+                            <DataGridTextColumn Header="Supplier" Binding="{Binding Supplier}" Width="230"/>
+                            <DataGridTextColumn Header="Supplier GSTIN" Binding="{Binding SupplierGstin}" Width="150"/>
+                            <DataGridTextColumn Header="Supplier invoice" Binding="{Binding SupplierInvoiceNo}" Width="120"/>
+                            <DataGridTextColumn Header="Taxable" Binding="{Binding TaxablePaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Credit claimed" Binding="{Binding ItcClaimedPaise, Converter={StaticResource Paise}}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Not claimed" Binding="{Binding ItcNotClaimedPaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalPaise, Converter={StaticResource Paise}}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+                <TabItem Header="Checks">
+                    <ListBox ItemsSource="{Binding Warnings}" BorderThickness="0" AutomationProperties.Name="Checks for the accountant" Margin="0,6">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding}" TextWrapping="Wrap" Margin="4,4,12,4"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </TabItem>
+            </TabControl>
+        </Border>
+    </Grid>
+    </ScrollViewer>
+</UserControl>

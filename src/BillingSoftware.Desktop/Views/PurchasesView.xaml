@@ -1,0 +1,52 @@
+<UserControl x:Class="BillingSoftware.Desktop.Views.PurchasesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="StatusText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusIsError}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="16">
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Purchases" Style="{StaticResource H1}"/>
+                    <WrapPanel Margin="0,10,0,0">
+                        <Button Content="+ New purchase" Command="{Binding NewCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,16,6"/>
+                        <TextBlock Text="From" VerticalAlignment="Center" Margin="0,0,6,6"/>
+                        <DatePicker SelectedDate="{Binding From}" MinWidth="140" Margin="0,0,10,6" AutomationProperties.Name="From date"/>
+                        <TextBlock Text="to" VerticalAlignment="Center" Margin="0,0,6,6"/>
+                        <DatePicker SelectedDate="{Binding To}" MinWidth="140" Margin="0,0,16,6" AutomationProperties.Name="To date"/>
+                        <Button Content="View" Command="{Binding ViewCommand}" Margin="0,0,8,6"/>
+                        <Button Content="Return to supplier..." Command="{Binding ReturnToSupplierCommand}" Margin="0,0,0,6"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding Summary}" Style="{StaticResource Muted}"/>
+                    <DataGrid ItemsSource="{Binding Items}" SelectedItem="{Binding Selected, Mode=TwoWay}" Margin="0,8,0,0" MinHeight="200" MaxHeight="420" AutomationProperties.Name="Purchases">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Purchase no." Binding="{Binding Number}" Width="150"/>
+                            <DataGridTextColumn Header="Date" Binding="{Binding DateText}" Width="90"/>
+                            <DataGridTextColumn Header="Supplier" Binding="{Binding Supplier}" Width="*" MinWidth="120"/>
+                            <DataGridTextColumn Header="Supplier invoice" Binding="{Binding InvoiceNo}" Width="130"/>
+                            <DataGridTextColumn Header="Total" Binding="{Binding TotalText}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock Text="Returns to suppliers (debit notes)" Style="{StaticResource H2}" Margin="0,18,0,0"/>
+                    <DataGrid ItemsSource="{Binding Returns}" SelectedItem="{Binding SelectedReturn, Mode=TwoWay}" Margin="0,8,0,0" MinHeight="90" MaxHeight="200" AutomationProperties.Name="Debit notes">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Debit note" Binding="{Binding Number}" Width="150"/>
+                            <DataGridTextColumn Header="Date" Binding="{Binding DateText}" Width="90"/>
+                            <DataGridTextColumn Header="Against purchase" Binding="{Binding Against}" Width="*" MinWidth="140"/>
+                            <DataGridTextColumn Header="Amount" Binding="{Binding TotalText}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Button Content="View debit note" Command="{Binding ViewReturnCommand}" Margin="0,8,0,0" HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding Status}" Style="{StaticResource StatusText}" Margin="0,10,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

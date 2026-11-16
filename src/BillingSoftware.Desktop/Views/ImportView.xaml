@@ -1,0 +1,71 @@
+<UserControl x:Class="BillingSoftware.Desktop.Views.ImportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="B2V"/>
+        <Style x:Key="StatusText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusIsError}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ImportRowStyle" TargetType="DataGridRow">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsError}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+                <DataTrigger Binding="{Binding IsSkipped}" Value="True"><Setter Property="Foreground" Value="#8A93A3"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="Scroller_SizeChanged">
+        <Grid x:Name="Root" Margin="16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="SecondColumn" Width="380"/></Grid.ColumnDefinitions>
+            <Grid.RowDefinitions><RowDefinition x:Name="FirstRow" Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+
+            <Border x:Name="ListPane" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Import from a file" Style="{StaticResource H1}"/>
+                        <TextBlock Text="{Binding Summary}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                        <TextBlock Text="{Binding Problem}" TextWrapping="Wrap" Foreground="{StaticResource DangerBrush}" Margin="0,4,0,0"/>
+                        <Button Content="Import another file" Command="{Binding ResetCommand}" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" Margin="0,10,0,0"
+                                Visibility="{Binding IsDone, Converter={StaticResource B2V}}" AutomationProperties.Name="Import another file"/>
+                    </StackPanel>
+                    <DataGrid x:Name="ResultGrid" Grid.Row="1" ItemsSource="{Binding Rows}" RowStyle="{StaticResource ImportRowStyle}" Margin="0,10,0,0" MinHeight="260" AutomationProperties.Name="Rows in the file">
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <Border x:Name="FormPane" Grid.Column="1" Style="{StaticResource Card}" Padding="0">
+                <DockPanel>
+                    <Border DockPanel.Dock="Bottom" BorderBrush="{StaticResource LineBrush}" BorderThickness="0,1,0,0" Padding="16,12,16,16">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Status}" Style="{StaticResource StatusText}" Margin="0,0,0,10"/>
+                            <Button Content="{Binding ImportButtonText}" Command="{Binding ImportNowCommand}" Style="{StaticResource PrimaryButton}" MinHeight="46" FontSize="16" HorizontalAlignment="Stretch" Margin="0"/>
+                        </StackPanel>
+                    </Border>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel Margin="16,14,16,10">
+                            <TextBlock Text="1. What are you importing?" Style="{StaticResource H2}"/>
+                            <ComboBox ItemsSource="{Binding Kinds}" SelectedItem="{Binding Kind}" DisplayMemberPath="Label" Margin="0,6,0,0" AutomationProperties.Name="What to import"/>
+                            <TextBlock Text="{Binding Kind.Help}" Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                            <Button Content="Save a blank template..." Command="{Binding SaveTemplateCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"/>
+
+                            <TextBlock Text="2. Choose your file" Style="{StaticResource H2}" Margin="0,18,0,0"/>
+                            <TextBlock Text="An Excel (.xlsx) or CSV file with the headings in the first row. Nothing is saved until you press Import." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            <Button Content="Choose file..." Command="{Binding ChooseFileCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                            <TextBlock Text="{Binding FilePath}" TextWrapping="Wrap" Style="{StaticResource Muted}" Margin="0,6,0,0"/>
+
+                            <StackPanel Visibility="{Binding NeedsAsAt, Converter={StaticResource B2V}}" Margin="0,18,0,0">
+                                <TextBlock Text="3. The opening amounts are as at" Style="{StaticResource H2}"/>
+                                <DatePicker SelectedDate="{Binding AsAt}" Margin="0,6,0,0" AutomationProperties.Name="Opening amounts as at"/>
+                                <TextBlock Text="The date the amounts owed were true, usually the day before you started using the software." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

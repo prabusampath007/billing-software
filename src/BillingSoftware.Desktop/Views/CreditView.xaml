@@ -1,0 +1,99 @@
+<UserControl x:Class="BillingSoftware.Desktop.Views.CreditView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="StatusText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusIsError}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="AgeingRowStyle" TargetType="DataGridRow">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsOver}" Value="True"><Setter Property="Foreground" Value="{StaticResource DangerBrush}"/></DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" SizeChanged="Scroller_SizeChanged">
+        <Grid x:Name="Root" Margin="16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition x:Name="SecondColumn" Width="380"/></Grid.ColumnDefinitions>
+            <Grid.RowDefinitions><RowDefinition x:Name="FirstRow" Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+
+            <!-- Who owes you / statement -->
+            <Border x:Name="ListPane" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <TextBlock Text="Credit customers" Style="{StaticResource H1}"/>
+                            <Button Grid.Column="1" Content="Save list to Excel" Command="{Binding ExportAgeingCommand}" Margin="0"/>
+                        </Grid>
+                        <TextBlock Text="{Binding SummaryText}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                        <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                   Text="Payments are counted against the oldest amounts first. Customers over their credit limit are shown in red."/>
+                    </StackPanel>
+                    <TabControl Grid.Row="1" Margin="0,8,0,0" MinHeight="240">
+                        <TabItem Header="Who owes you">
+                            <DataGrid ItemsSource="{Binding Rows}" SelectedItem="{Binding Selected, Mode=TwoWay}" RowStyle="{StaticResource AgeingRowStyle}" AutomationProperties.Name="Customers who owe money">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Customer" Binding="{Binding Name}" Width="180"/>
+                                    <DataGridTextColumn Header="Owes" Binding="{Binding OwesText}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="0-30 days" Binding="{Binding CurrentText}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="31-60" Binding="{Binding Days31Text}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="61-90" Binding="{Binding Days61Text}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="Over 90" Binding="{Binding Over90Text}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="Oldest" Binding="{Binding OldestText}" Width="90" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="Credit limit" Binding="{Binding LimitText}" Width="130" ElementStyle="{StaticResource RightCell}"/>
+                                    <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="110"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </TabItem>
+                        <TabItem Header="Statement">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <StackPanel Margin="0,6,0,6">
+                                    <TextBlock Text="{Binding CustomerText}" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                                    <WrapPanel Margin="0,6,0,0">
+                                        <TextBlock Text="From" VerticalAlignment="Center" Margin="0,0,6,6"/>
+                                        <DatePicker SelectedDate="{Binding From}" MinWidth="130" Margin="0,0,10,6" AutomationProperties.Name="Statement from date"/>
+                                        <TextBlock Text="to" VerticalAlignment="Center" Margin="0,0,6,6"/>
+                                        <DatePicker SelectedDate="{Binding To}" MinWidth="130" Margin="0,0,10,6" AutomationProperties.Name="Statement to date"/>
+                                    </WrapPanel>
+                                    <TextBlock Text="{Binding BroughtForwardText}" Style="{StaticResource Muted}"/>
+                                </StackPanel>
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding Entries}" AutomationProperties.Name="Customer statement">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Date" Binding="{Binding DateText}" Width="90"/>
+                                        <DataGridTextColumn Header="Type" Binding="{Binding Kind}" Width="120"/>
+                                        <DataGridTextColumn Header="Reference" Binding="{Binding Reference}" Width="150"/>
+                                        <DataGridTextColumn Header="Details" Binding="{Binding Description}" Width="240"/>
+                                        <DataGridTextColumn Header="Owed" Binding="{Binding DebitText}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                        <DataGridTextColumn Header="Paid" Binding="{Binding CreditText}" Width="100" ElementStyle="{StaticResource RightCell}"/>
+                                        <DataGridTextColumn Header="Balance" Binding="{Binding BalanceText}" Width="110" ElementStyle="{StaticResource RightCell}"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <TextBlock Grid.Row="2" Text="{Binding ClosingText}" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </Border>
+
+            <!-- What to do about the selected customer -->
+            <Border x:Name="FormPane" Grid.Column="1" Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="Selected customer" Style="{StaticResource H2}"/>
+                    <TextBlock Text="{Binding CustomerText}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <Button Content="Print statement" Command="{Binding PrintStatementCommand}" Margin="0,14,0,0" HorizontalAlignment="Stretch" MinHeight="40"/>
+                    <Button Content="Print payment reminder" Command="{Binding PrintReminderCommand}" Margin="0,8,0,0" HorizontalAlignment="Stretch" MinHeight="40"/>
+                    <Button Content="Save statement to Excel" Command="{Binding ExportStatementCommand}" Margin="0,8,0,0" HorizontalAlignment="Stretch" MinHeight="40"/>
+                    <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,14,0,0"
+                               Text="To record a payment, use the Customers screen. To set or change a credit limit, edit the customer there."/>
+                    <TextBlock Text="{Binding Status}" Style="{StaticResource StatusText}" Margin="0,12,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

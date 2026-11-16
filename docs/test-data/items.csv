@@ -1,0 +1,11 @@
+Name,Code,Barcode,HSN,GST %,Unit,Price,MRP,Price includes GST,Opening stock,Opening cost
+Lux Soap 100g,SOAP100,2900000001015,3401,18,pcs,45.00,45.00,Yes,50,28.00
+Tata Salt 1kg,SALT1,2900000001022,2501,5,pcs,28.00,28.00,Yes,40,20.00
+Basmati Rice (loose),RICE-L,2900000001039,1006,5,kg,120.00,,Yes,25,80.00
+Rice 250 g pack,RICE-250,2900000001046,1006,5,pcs,32.00,,Yes,0,
+Notebook A4 200 pages,NOTE200,2900000001053,4820,12,pcs,85.00,85.00,Yes,30,55.00
+Steel Tumbler Set of 6,TUMB6,2900000001060,7323,18,pcs,450.00,450.00,Yes,10,300.00
+Bad price example,BAD1,,,18,pcs,abc,,,,
+Bad barcode example,BAD2,2900000001078,,18,pcs,10.00,,,,
+Repeated code example,SOAP100,,,18,pcs,10.00,,,,
+,NONAME,,,18,pcs,10.00,,,,

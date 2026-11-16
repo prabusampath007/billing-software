@@ -1,0 +1,201 @@
+<UserControl x:Class="BillingSoftware.Desktop.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="StatusByTag" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="SectionCard" TargetType="Border" BasedOn="{StaticResource Card}">
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Margin="16" MaxWidth="900" HorizontalAlignment="Stretch">
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <TextBlock Text="Settings" Style="{StaticResource H1}" VerticalAlignment="Center"/>
+                <Button Grid.Column="1" Content="✕  Close" Click="Close_Click" Margin="0" AutomationProperties.Name="Close settings"/>
+            </Grid>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Business details" Style="{StaticResource H2}"/>
+                    <TextBlock Text="Business name" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding BusinessName}" AutomationProperties.Name="Business name"/>
+                    <TextBlock Text="State" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox ItemsSource="{Binding States}" SelectedItem="{Binding State}" DisplayMemberPath="Display" AutomationProperties.Name="State"/>
+                    <TextBlock Text="GSTIN" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding Gstin}" MaxLength="15" CharacterCasing="Upper" AutomationProperties.Name="GSTIN"/>
+                    <CheckBox Content="Charge GST on bills (turn off if the business does not charge GST)" IsChecked="{Binding GstEnabled}" Margin="0,10,0,0" AutomationProperties.Name="Charge GST"/>
+                    <CheckBox Content="Composition scheme (bill of supply, no tax shown)" IsChecked="{Binding IsComposition}" IsEnabled="{Binding GstEnabled}"/>
+                    <TextBlock Text="Address" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding Address}" TextWrapping="Wrap" AcceptsReturn="True" MinHeight="56" VerticalContentAlignment="Top"/>
+                    <TextBlock Text="Phone" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding Phone}"/>
+                    <Button Content="Save business details" Command="{Binding SaveBusinessCommand}" Style="{StaticResource PrimaryButton}" Margin="0,14,0,0" HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding BusinessStatus}" Tag="{Binding BusinessIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Billing rules" Style="{StaticResource H2}"/>
+                    <TextBlock Text="Discount a cashier can give without Admin approval (%)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding DiscountLimitText}" MaxWidth="160" HorizontalAlignment="Left" HorizontalContentAlignment="Right" AutomationProperties.Name="Cashier discount limit"/>
+                    <TextBlock Text="Lock the screen after no activity for (minutes)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding IdleMinutesText}" MaxWidth="160" HorizontalAlignment="Left" HorizontalContentAlignment="Right" AutomationProperties.Name="Auto lock minutes"/>
+                    <TextBlock Text="GST: large inter-state consumer invoice limit (rupees). Check the current legal limit with your accountant." Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding LargeInvoiceLimitText}" MaxWidth="160" HorizontalAlignment="Left" HorizontalContentAlignment="Right" AutomationProperties.Name="Large invoice limit"/>
+                    <Button Content="Save" Command="{Binding SaveRulesCommand}" Style="{StaticResource PrimaryButton}" Margin="0,14,0,0" HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding RulesStatus}" Tag="{Binding RulesIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Backup" Style="{StaticResource H2}"/>
+                    <TextBlock Text="Your data is backed up (encrypted and checked) at the end of every day and every 2 hours while the app is open. Choose a folder on a second drive or a USB drive, not the same disk as the data."
+                               Style="{StaticResource Muted}" Margin="0,4,0,0"/>
+                    <TextBlock Text="Backup folder" Style="{StaticResource FieldLabel}"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding BackupFolder}" IsReadOnly="True" AutomationProperties.Name="Backup folder"/>
+                        <Button Grid.Column="1" Content="Choose folder..." Command="{Binding ChooseFolderCommand}" Margin="8,0,0,0"/>
+                    </Grid>
+                    <TextBlock Text="If no folder was chosen, the program picked one itself: the shared Documents folder on the C: drive, which stays when the software is uninstalled or Windows restarts. Copy this folder to a USB drive or another computer regularly; the files are encrypted and need the recovery key to be opened on another computer." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,6,0,0"/>
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button Content="Back up now" Command="{Binding BackupNowCommand}" Margin="0,0,8,6"/>
+                        <Button Content="Open the backup folder" Command="{Binding OpenBackupFolderCommand}" Margin="0,0,0,6"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding BackupStatus}" Tag="{Binding BackupIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Health check and support" Style="{StaticResource H2}"/>
+                    <TextBlock Text="Checks the database, the books, the activity log, backups and disk space. If something is wrong, save a support file and send it: it holds no bills, customer details, passwords or keys."
+                               Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="Check this installation" Command="{Binding RunHealthCommand}" Margin="0,0,8,6"/>
+                        <Button Content="Save a support file..." Command="{Binding SaveSupportFileCommand}" Margin="0,0,0,6"/>
+                    </WrapPanel>
+                    <DataGrid ItemsSource="{Binding Health}" MaxHeight="260" Margin="0,6,0,0" AutomationProperties.Name="Health check results">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="" Binding="{Binding LevelText}" Width="80"/>
+                            <DataGridTextColumn Header="Check" Binding="{Binding Name}" Width="150"/>
+                            <DataGridTextColumn Header="Result" Binding="{Binding Message}" Width="520"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <TextBlock Text="{Binding HealthStatus}" Tag="{Binding HealthIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Printers" Style="{StaticResource H2}"/>
+                    <TextBlock Text="Receipts print on the thermal roll. Statements, reports and A4 invoices go to the document printer, and labels to the label printer; if one is not chosen, you are asked each time."
+                               Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    <TextBlock Text="Receipt printer (thermal)" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox ItemsSource="{Binding Printers}" SelectedItem="{Binding ReceiptPrinter}" DisplayMemberPath="Label" AutomationProperties.Name="Receipt printer"/>
+                    <TextBlock Text="Receipt paper" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox ItemsSource="{Binding PaperChoices}" SelectedItem="{Binding Paper}" DisplayMemberPath="Label" MaxWidth="240" HorizontalAlignment="Left" AutomationProperties.Name="Receipt paper width"/>
+                    <TextBlock Text="Document printer (A4: statements, reports, invoices)" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox ItemsSource="{Binding Printers}" SelectedItem="{Binding DocumentPrinter}" DisplayMemberPath="Label" AutomationProperties.Name="Document printer"/>
+                    <TextBlock Text="Label printer" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox ItemsSource="{Binding Printers}" SelectedItem="{Binding LabelPrinter}" DisplayMemberPath="Label" AutomationProperties.Name="Label printer"/>
+                    <TextBlock Text="Labels" Style="{StaticResource FieldLabel}"/>
+                    <ComboBox ItemsSource="{Binding LabelModes}" SelectedItem="{Binding LabelMode}" DisplayMemberPath="Label" MaxWidth="320" HorizontalAlignment="Left" AutomationProperties.Name="Label layout"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <TextBlock Text="Label size (mm)" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                        <TextBox Text="{Binding LabelWidthText}" Width="60" HorizontalContentAlignment="Right" AutomationProperties.Name="Label width in millimetres"/>
+                        <TextBlock Text="x" VerticalAlignment="Center" Margin="8,0"/>
+                        <TextBox Text="{Binding LabelHeightText}" Width="60" HorizontalContentAlignment="Right" AutomationProperties.Name="Label height in millimetres"/>
+                    </WrapPanel>
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button Content="Save printer settings" Command="{Binding SavePrintersCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,6"/>
+                        <Button Content="Print a test receipt" Command="{Binding TestPrintCommand}" Margin="0,0,0,6"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding PrintStatus}" Tag="{Binding PrintIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Lock earlier periods" Style="{StaticResource H2}"/>
+                    <TextBlock Text="Once the accountant has the figures for a month, lock it so nothing can be added to or changed in it by accident." Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    <TextBlock Text="{Binding LockSummary}" FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,8,0,0"/>
+                    <TextBlock Text="Lock everything up to and including" Style="{StaticResource FieldLabel}"/>
+                    <DatePicker SelectedDate="{Binding LockDate}" MaxWidth="220" HorizontalAlignment="Left" AutomationProperties.Name="Lock date"/>
+                    <TextBlock Text="Reason (needed to move the lock back or remove it)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding LockReason}" MaxLength="120" AutomationProperties.Name="Lock reason"/>
+                    <WrapPanel Margin="0,12,0,0">
+                        <Button Content="Lock this period..." Command="{Binding SaveLockCommand}" Style="{StaticResource PrimaryButton}" Margin="0,0,8,6"/>
+                        <Button Content="Remove the lock..." Command="{Binding RemoveLockCommand}" Margin="0,0,0,6"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding LockStatus}" Tag="{Binding LockIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Restore from a backup" Style="{StaticResource H2}"/>
+                    <TextBlock Text="Use this if the data was lost or damaged, or to go back to an earlier day. Today's data is always saved as a safety copy first, and nothing changes until you confirm."
+                               Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                    <ListBox ItemsSource="{Binding Backups}" SelectedItem="{Binding SelectedBackup}" DisplayMemberPath="Text" MinHeight="50" MaxHeight="150" Margin="0,8,0,0" AutomationProperties.Name="Backups"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="Refresh list" Command="{Binding RefreshBackupsCommand}" Margin="0,0,8,6"/>
+                        <Button Content="Choose another backup file..." Command="{Binding BrowseBackupCommand}" Margin="0,0,0,6"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding RestoreText}" TextWrapping="Wrap" Margin="0,6,0,0" Tag="{Binding RestoreIsError}" Style="{StaticResource StatusByTag}"/>
+                    <Button Content="Restore this backup..." Command="{Binding RestoreNowCommand}" Style="{StaticResource DangerButton}" Margin="0,12,0,0" HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding RestoreStatus}" Tag="{Binding RestoreIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="People who can sign in" Style="{StaticResource H2}"/>
+                    <DataGrid ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser, Mode=TwoWay}" Margin="0,8,0,0" MinHeight="120" MaxHeight="240" AutomationProperties.Name="Users">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="*" MinWidth="100"/>
+                            <DataGridTextColumn Header="Name" Binding="{Binding DisplayName}" Width="*" MinWidth="100"/>
+                            <DataGridTextColumn Header="Role" Binding="{Binding RoleText}" Width="80"/>
+                            <DataGridTextColumn Header="Status" Binding="{Binding ActiveText}" Width="80"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <WrapPanel Margin="0,10,0,0">
+                        <Button Content="Reset password" Command="{Binding ResetPasswordCommand}" Margin="0,0,8,6"/>
+                        <Button Content="Enable / disable" Command="{Binding ToggleActiveCommand}" Margin="0,0,8,6"/>
+                    </WrapPanel>
+                    <TextBlock Text="Add a cashier" Style="{StaticResource FieldLabel}" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                    <TextBlock Text="Username" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding NewUsername}" AutomationProperties.Name="New cashier username"/>
+                    <TextBlock Text="Name" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding NewDisplayName}" AutomationProperties.Name="New cashier name"/>
+                    <TextBlock Text="Password (at least 8 characters)" Style="{StaticResource FieldLabel}"/>
+                    <TextBox Text="{Binding NewPassword}" AutomationProperties.Name="New cashier password"/>
+                    <Button Content="Add cashier" Command="{Binding AddCashierCommand}" Style="{StaticResource PrimaryButton}" Margin="0,12,0,0" HorizontalAlignment="Left"/>
+                    <TextBlock Text="{Binding UsersStatus}" Tag="{Binding UsersIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource SectionCard}">
+                <StackPanel>
+                    <TextBlock Text="Security" Style="{StaticResource H2}"/>
+                    <WrapPanel Margin="0,8,0,0">
+                        <Button Content="Check activity log" Command="{Binding VerifyAuditCommand}" Margin="0,0,8,6"/>
+                        <Button Content="Show recovery key" Command="{Binding ShowRecoveryKeyCommand}" Margin="0,0,8,6"/>
+                    </WrapPanel>
+                    <TextBlock Text="{Binding SecurityStatus}" Tag="{Binding SecurityIsError}" Style="{StaticResource StatusByTag}"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
